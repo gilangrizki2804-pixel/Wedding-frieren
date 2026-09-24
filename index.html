@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>The Wedding of Himmel & Frieren | Undangan Pernikahan Pixel</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=MedievalSharp&family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Magic Petals / Mana Particles Canvas -->
+  <canvas id="particlesCanvas"></canvas>
+
+  <!-- ======================================================== -->
+  <!-- 1. LANDING SCREEN / INTRO: PETI MISTERIUS -->
+  <!-- ======================================================== -->
+  <section id="introScreen" class="screen-section active">
+    <!-- Starry & ambient backdrop -->
+    <div class="intro-backdrop"></div>
+
+    <div class="intro-content">
+      <!-- Title banner -->
+      <div class="intro-header">
+        <div class="pixel-badge">📜 Royal Quest Invitation</div>
+        <h1 class="intro-title">THE WEDDING JOURNEY</h1>
+        <div class="intro-names">Himmel &amp; Frieren</div>
+        <p class="intro-subtitle">Sebuah peti harta karun misterius tergeletak di depan katedral...</p>
+      </div>
+
+      <!-- Chest Interactive Area -->
+      <div class="chest-stage" id="chestStage" role="button" tabindex="0" aria-label="Buka Peti Harta Karun">
+        
+        <!-- Magic Circle (Hidden initially, spins and accelerates on open) -->
+        <div class="magic-circle-wrapper" id="magicCircleWrapper">
+          <img src="assets/magic_circle_transparent.png" id="magicCircleImg" alt="Lingkaran Sihir Frieren" class="magic-circle-img">
+          <div class="magic-glow-ring"></div>
+        </div>
+
+        <!-- Chest Visual Container -->
+        <div class="chest-box" id="chestBox">
+          <!-- Closed Chest Image -->
+          <img src="assets/chest_closed.png" id="chestClosedImg" alt="Peti Harta Karun Tertutup" class="chest-img closed visible">
+          <!-- Opened Chest with Frieren inside -->
+          <img src="assets/chest_open.png" id="chestOpenImg" alt="Peti Terbuka Frieren" class="chest-img open hidden">
+        </div>
+
+        <!-- Frieren cute dialogue pop-in -->
+        <div class="frieren-speech-bubble" id="frierenSpeech">
+          <span class="pixel-quote">"Kurai yo! Kowai yo! ...Eh, kalian sudah datang?!" ✨</span>
+        </div>
+
+        <!-- Pulsing Prompt Tag -->
+        <div class="chest-prompt" id="chestPrompt">
+          <div class="prompt-arrow">▼</div>
+          <div class="prompt-pill">
+            <span class="key-icon">🗝️</span> Klik peti untuk membuka undangan!
+          </div>
+        </div>
+      </div>
+
+      <div class="intro-footer-note">
+        <span>✨ Gunakan audio/suara untuk pengalaman terbaik ✨</span>
+      </div>
+    </div>
+
+    <!-- White Flash Transition Overlay -->
+    <div class="teleport-flash" id="teleportFlash"></div>
+  </section>
+
+
+  <!-- ======================================================== -->
+  <!-- 2. MAIN SCREEN: PETA PERNIKAHAN PIXEL ART (CHURCH SCENE) -->
+  <!-- ======================================================== -->
+  <main id="mainScreen" class="screen-section">
+    <!-- Top HUD Navigation Bar -->
+    <header class="rpg-top-bar">
+      <div class="bar-left">
+        <div class="wedding-brand">
+          <span class="brand-crest">⚜️</span>
+          <div class="brand-text">
+            <span class="brand-title">Himmel &amp; Frieren</span>
+            <span class="brand-date">24.10.2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bar-center">
+        <div class="quest-status-chip">
+          <span class="pulse-dot"></span>
+          <span class="quest-text">Ketuk karakter di gereja untuk info pernikahan!</span>
+        </div>
+      </div>
+
+      <div class="bar-right">
+        <button id="togglePinsBtn" class="rpg-btn btn-sm" title="Tampilkan / Sembunyikan Penanda Karakter">
+          <span class="btn-icon">📍</span>
+          <span class="btn-label">Penanda: ON</span>
+        </button>
+        <button id="musicToggleBtn" class="rpg-btn btn-sm" title="Putar / Heningkan Musik">
+          <span class="btn-icon" id="musicIcon">🎵</span>
+          <span class="btn-label" id="musicLabel">Musik</span>
+        </button>
+        <button id="replayIntroBtn" class="rpg-btn btn-sm" title="Buka Peti Lagi">
+          <span class="btn-icon">🔄</span>
+          <span class="btn-label">Peti</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Map Stage Container -->
+    <div class="map-viewport" id="mapViewport">
+      <!-- Floating Map Zoom & Navigation Controls -->
+      <div class="map-hud-controls" aria-label="Kontrol Peta">
+        <button id="zoomInBtn" class="hud-circle-btn" title="Perbesar Peta (Zoom In)">+</button>
+        <button id="zoomOutBtn" class="hud-circle-btn" title="Perkecil Peta (Zoom Out)">−</button>
+        <button id="centerMapBtn" class="hud-circle-btn" title="Pusatkan ke Altar">🎯</button>
+      </div>
+
+      <div class="map-canvas-wrapper" id="mapCanvasWrapper">
+        <!-- Isometric Church Wedding Map -->
+        <img src="assets/wedding_map.jpg" alt="Peta Pernikahan Himmel dan Frieren" id="weddingMapImg" class="wedding-map-img">
+
+        <!-- Banner text overlay (placed over the hanging banner on top-right) -->
+        <div class="banner-title-overlay" id="bannerOverlay" data-character="banner">
+          <div class="banner-monogram">H &amp; F</div>
+          <div class="banner-date">24 OKTOBER 2026</div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- CHARACTER INTERACTIVE HOTSPOTS & PINS                -->
+        <!-- ==================================================== -->
+
+        <!-- 1. Himmel & Frieren (Center Altar) -->
+        <div class="char-hotspot" id="hotspotHimmelFrieren" data-character="himmel-frieren" style="left: 42%; top: 28%; width: 20%; height: 42%;">
+          <div class="char-pin pin-gold">
+            <span class="pin-symbol">💍</span>
+            <span class="pin-title">Mempelai</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 2. Pendeta Heiter (Altar Priest) -->
+        <div class="char-hotspot" id="hotspotHeiter" data-character="heiter" style="left: 58%; top: 15%; width: 12%; height: 30%;">
+          <div class="char-pin pin-blue">
+            <span class="pin-symbol">📜</span>
+            <span class="pin-title">Pemberkatan</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 3. Eisen (Left Front Warrior) -->
+        <div class="char-hotspot" id="hotspotEisen" data-character="eisen" style="left: 5%; top: 43%; width: 14%; height: 26%;">
+          <div class="char-pin pin-orange">
+            <span class="pin-symbol">🍗</span>
+            <span class="pin-title">Resepsi &amp; Pesta</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 4. Stark & Teman (Left Middle Bench) -->
+        <div class="char-hotspot" id="hotspotStark" data-character="stark" style="left: 34%; top: 50%; width: 14%; height: 24%;">
+          <div class="char-pin pin-red">
+            <span class="pin-symbol">⚔️</span>
+            <span class="pin-title">Kisah Cinta</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 5. Fern & Methode (Right Middle Bench) -->
+        <div class="char-hotspot" id="hotspotFern" data-character="fern" style="left: 60%; top: 64%; width: 23%; height: 26%;">
+          <div class="char-pin pin-purple">
+            <span class="pin-symbol">💌</span>
+            <span class="pin-title">RSVP Hadir</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 6. Sein (Left Top Bench) -->
+        <div class="char-hotspot" id="hotspotSein" data-character="sein" style="left: 27%; top: 17%; width: 13%; height: 24%;">
+          <div class="char-pin pin-green">
+            <span class="pin-symbol">📍</span>
+            <span class="pin-title">Lokasi &amp; Peta</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+        <!-- 7. Grimoire / Buku Tamu (Bottom-Left Corner) -->
+        <div class="char-hotspot" id="hotspotGrimoire" data-character="grimoire" style="left: 2%; top: 82%; width: 14%; height: 16%;">
+          <div class="char-pin pin-cyan">
+            <span class="pin-symbol">📖</span>
+            <span class="pin-title">Amplop &amp; Hadiah</span>
+          </div>
+          <div class="char-highlight-glow"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom Quick Access RPG Dock (For direct quick tap on mobile or desktop) -->
+    <nav class="rpg-bottom-dock" aria-label="Menu Akses Cepat">
+      <button class="dock-item active" data-target="map" title="Peta Gereja">
+        <span class="dock-icon">🏰</span>
+        <span class="dock-label">Peta</span>
+      </button>
+      <button class="dock-item" data-character="himmel-frieren" title="Mempelai Pengantin">
+        <span class="dock-icon">💍</span>
+        <span class="dock-label">Mempelai</span>
+      </button>
+      <button class="dock-item" data-character="heiter" title="Pemberkatan Akad">
+        <span class="dock-icon">📜</span>
+        <span class="dock-label">Akad</span>
+      </button>
+      <button class="dock-item" data-character="eisen" title="Pesta Resepsi">
+        <span class="dock-icon">🍗</span>
+        <span class="dock-label">Resepsi</span>
+      </button>
+      <button class="dock-item" data-character="sein" title="Lokasi Acara">
+        <span class="dock-icon">📍</span>
+        <span class="dock-label">Lokasi</span>
+      </button>
+      <button class="dock-item" data-character="fern" title="Konfirmasi RSVP">
+        <span class="dock-icon">💌</span>
+        <span class="dock-label">RSVP</span>
+      </button>
+      <button class="dock-item" data-character="grimoire" title="Grimoire Amplop Digital">
+        <span class="dock-icon">📖</span>
+        <span class="dock-label">Hadiah</span>
+      </button>
+    </nav>
+  </main>
+
+
+  <!-- ======================================================== -->
+  <!-- 3. JRPG DIALOG MODAL BOX (FOR EACH CHARACTER)            -->
+  <!-- ======================================================== -->
+  <div class="rpg-modal-backdrop" id="dialogBackdrop" aria-hidden="true">
+    <div class="rpg-dialog-window" id="dialogWindow" role="dialog" aria-modal="true">
+      
+      <!-- Window Header Bar -->
+      <div class="dialog-header">
+        <div class="dialog-title-group">
+          <span class="dialog-icon-badge" id="dialogHeaderIcon">💍</span>
+          <span class="dialog-speaker-name" id="dialogSpeaker">Himmel &amp; Frieren</span>
+          <span class="dialog-role-tag" id="dialogRole">The Bride &amp; Groom</span>
+        </div>
+        <button class="dialog-close-btn" id="dialogCloseBtn" aria-label="Tutup Dialog">✕</button>
+      </div>
+
+      <!-- Window Body -->
+      <div class="dialog-body">
+        
+        <!-- Left: Character Pixel Portrait Frame -->
+        <div class="dialog-portrait-wrapper">
+          <div class="dialog-portrait-frame">
+            <img src="assets/avatar_himmel.png" alt="Potret Karakter" id="dialogPortraitImg" class="dialog-portrait-img">
+          </div>
+          <div class="portrait-name-plate" id="portraitPlate">Himmel</div>
+        </div>
+
+        <!-- Right: Dialogue Text & Form Content -->
+        <div class="dialog-content-area">
+          <!-- Quote Bubble with typewriter effect -->
+          <div class="speech-quote-box">
+            <div class="quote-mark">“</div>
+            <p class="typewriter-text" id="dialogSpeechText">Memuat dialog...</p>
+          </div>
+
+          <!-- Dynamic Rich Content (Details, countdown, forms, map links) -->
+          <div class="dialog-extra-content" id="dialogExtraContent">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Window Footer with RPG prompt -->
+      <div class="dialog-footer">
+        <span class="footer-tip">Tekan <kbd>ESC</kbd> atau klik tombol ✕ untuk kembali ke peta</span>
+        <button class="rpg-btn btn-action" id="dialogActionBtn">Tutup Percakapan</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
