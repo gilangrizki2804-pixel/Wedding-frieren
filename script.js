@@ -928,6 +928,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Attach hotspots clicks on the map
   document.querySelectorAll('.char-hotspot').forEach(hotspot => {
     hotspot.addEventListener('click', () => {
+      if (hasMovedFar) return;
       const charKey = hotspot.dataset.character;
       openCharacterDialog(charKey);
     });
@@ -937,6 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bannerOverlay = document.getElementById('bannerOverlay');
   if (bannerOverlay) {
     bannerOverlay.addEventListener('click', () => {
+      if (hasMovedFar) return;
       openCharacterDialog('banner');
     });
   }
@@ -1074,12 +1076,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const zoomOutBtn = document.getElementById('zoomOutBtn');
   const centerMapBtn = document.getElementById('centerMapBtn');
 
-  let zoomLevels = [0.75, 1, 1.35, 1.8];
+  const zoomWidths = [700, 860, 1080, 1360];
   let zoomIndex = 1;
 
   function updateZoom(newIdx) {
-    zoomIndex = Math.max(0, Math.min(zoomLevels.length - 1, newIdx));
-    mapCanvasWrapper.style.transform = `scale(${zoomLevels[zoomIndex]})`;
+    zoomIndex = Math.max(0, Math.min(zoomWidths.length - 1, newIdx));
+    mapCanvasWrapper.style.width = zoomWidths[zoomIndex] + 'px';
     audio.playBlip(500 + zoomIndex * 100, 0.04);
   }
 
@@ -1098,41 +1100,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollTopTarget = mapViewport.scrollTop + (hpRect.top + hpRect.height / 2) - (vpRect.top + vpRect.height / 2);
 
     mapViewport.scrollTo({
-      left: scrollLeftTarget,
-      top: scrollTopTarget,
+      left: Math.max(0, scrollLeftTarget),
+      top: Math.max(0, scrollTopTarget),
       behavior: 'smooth'
     });
   }
   window.centerOnCharacter = centerOnCharacter;
 
-  // Mouse Drag to Pan
+  // Mouse & Touch Pan Handling
   let isPanning = false;
-  let startX, startY, scrollStartLeft, scrollStartTop;
+  let startX = 0, startY = 0;
+  let scrollStartLeft = 0, scrollStartTop = 0;
+  let hasMovedFar = false;
 
   if (mapViewport) {
+    // Mouse Drag
     mapViewport.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.char-hotspot') || e.target.closest('.map-hud-controls')) return;
+      if (e.target.closest('.map-hud-controls')) return;
       isPanning = true;
-      startX = e.pageX - mapViewport.offsetLeft;
-      startY = e.pageY - mapViewport.offsetTop;
+      hasMovedFar = false;
+      startX = e.pageX;
+      startY = e.pageY;
       scrollStartLeft = mapViewport.scrollLeft;
       scrollStartTop = mapViewport.scrollTop;
     });
 
     window.addEventListener('mouseup', () => {
       isPanning = false;
+      setTimeout(() => { hasMovedFar = false; }, 60);
     });
 
     mapViewport.addEventListener('mousemove', (e) => {
       if (!isPanning) return;
-      e.preventDefault();
-      const x = e.pageX - mapViewport.offsetLeft;
-      const y = e.pageY - mapViewport.offsetTop;
-      const walkX = (x - startX) * 1.3;
-      const walkY = (y - startY) * 1.3;
+      const walkX = e.pageX - startX;
+      const walkY = e.pageY - startY;
+      if (Math.hypot(walkX, walkY) > 6) {
+        hasMovedFar = true;
+      }
       mapViewport.scrollLeft = scrollStartLeft - walkX;
       mapViewport.scrollTop = scrollStartTop - walkY;
     });
+
+    // Touch Drag (for mobile smartphones)
+    mapViewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1 || e.target.closest('.map-hud-controls')) return;
+      isPanning = true;
+      hasMovedFar = false;
+      startX = e.touches[0].pageX;
+      startY = e.touches[0].pageY;
+      scrollStartLeft = mapViewport.scrollLeft;
+      scrollStartTop = mapViewport.scrollTop;
+    }, { passive: true });
+
+    mapViewport.addEventListener('touchmove', (e) => {
+      if (!isPanning || e.touches.length > 1) return;
+      const walkX = e.touches[0].pageX - startX;
+      const walkY = e.touches[0].pageY - startY;
+      if (Math.hypot(walkX, walkY) > 8) {
+        hasMovedFar = true;
+      }
+      mapViewport.scrollLeft = scrollStartLeft - walkX;
+      mapViewport.scrollTop = scrollStartTop - walkY;
+    }, { passive: true });
+
+    mapViewport.addEventListener('touchend', () => {
+      isPanning = false;
+      setTimeout(() => { hasMovedFar = false; }, 80);
+    }, { passive: true });
   }
 
   // Support direct URL hash navigation (e.g., #main or #heiter or #open-preview)
